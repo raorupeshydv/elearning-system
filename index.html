@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart E-Learning Management System</title>
+  <style>
+    /* --- GLOBAL --- */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+    .header { text-align: center; color: white; margin-bottom: 30px; }
+    .header h1 { font-size: 2.5em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
+
+    /* --- CARDS & BUTTONS --- */
+    .card {
+      background: white; border-radius: 15px; padding: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2); margin-bottom: 20px;
+    }
+    .btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white; padding: 12px 30px; border: none; border-radius: 8px;
+      font-size: 16px; cursor: pointer; transition: transform 0.2s; font-weight: 600;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+    .btn-small { padding: 8px 16px; font-size: 14px; }
+    .btn-secondary { background: #6c757d; }
+    .btn-danger { background: #dc3545; }
+    .btn-success { background: #28a745; }
+
+    /* --- FORM ELEMENTS --- */
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #333; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 12px; border: 2px solid #e0e0e0;
+      border-radius: 8px; font-size: 16px; transition: border 0.3s; font-family: inherit;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      outline: none; border-color: #667eea;
+    }
+    .hidden { display: none; }
+
+    /* --- COURSE CARDS --- */
+    .course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-top: 20px; }
+    .course-card {
+      background: #f8f9fa; border-radius: 10px; padding: 20px;
+      border-left: 4px solid #667eea; transition: transform 0.2s;
+    }
+    .course-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+
+    /* --- TABS --- */
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tab {
+      padding: 10px 20px; background: #e0e0e0; border: none; border-radius: 8px;
+      cursor: pointer; font-weight: 600; transition: all 0.3s;
+    }
+    .tab.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+
+    /* --- ALERTS --- */
+    .alert { padding: 15px; border-radius: 8px; margin-top: 10px; }
+    .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+    /* --- TABLES --- */
+    .attendance-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    .attendance-table th, .attendance-table td { padding: 12px; text-align: left; border-bottom: 1px solid #e0e0e0; }
+    .attendance-table th { background: #f8f9fa; font-weight: 600; color: #333; }
+    .status-present { color: #28a745; font-weight: 600; }
+    .status-absent { color: #dc3545; font-weight: 600; }
+
+    /* --- MODAL --- */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;
+    }
+    .modal.active { display: flex; }
+    .modal-content { background: white; padding: 30px; border-radius: 15px; max-width: 600px; width: 90%; }
+    .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #666; float: right; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎓 Smart E-Learning System</h1>
+      <p>Complete Learning Management Platform</p>
+    </div>
+
+    <!-- Authentication -->
+    <div id="authScreen" class="card">
+      <div class="tabs">
+        <button class="tab active" onclick="showTab('login', event)">Login</button>
+        <button class="tab" onclick="showTab('register', event)">Register</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="loginForm">
+        <h2>Welcome Back!</h2>
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="loginUsername" placeholder="Enter username">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="loginPassword" placeholder="Enter password">
+        </div>
+        <button class="btn" onclick="login()">Login</button>
+        <div id="authMessage"></div>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="registerForm" class="hidden">
+        <h2>Create Account</h2>
+        <div class="form-group"><label>Username</label><input type="text" id="regUsername"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="regEmail"></div>
+        <div class="form-group"><label>Password</label><input type="password" id="regPassword"></div>
+        <div class="form-group">
+          <label>Role</label>
+          <select id="regRole">
+            <option value="student">Student</option>
+            <option value="instructor">Instructor</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <button class="btn" onclick="register()">Register</button>
+        <div id="regMessage"></div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboardScreen" class="hidden">
+      <div class="user-info">
+        <strong>Welcome, <span id="userName"></span></strong> (<span id="userRole"></span>)
+        <button class="btn btn-secondary btn-small" onclick="logout()">Logout</button>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="showDashTab('courses', event)">📚 Courses</button>
+        <button class="tab" onclick="showDashTab('timetable', event)">📅 Timetable</button>
+        <button class="tab" onclick="showDashTab('attendance', event)">✓ Attendance</button>
+      </div>
+
+      <div id="coursesTab" class="card"></div>
+      <div id="timetableTab" class="card hidden"></div>
+      <div id="attendanceTab" class="card hidden"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:8080/api';
+    let currentUser = null;
+
+    function showTab(tab, e) {
+      document.getElementById('loginForm').classList.toggle('hidden', tab !== 'login');
+      document.getElementById('registerForm').classList.toggle('hidden', tab !== 'register');
+      document.querySelectorAll('#authScreen .tab').forEach(t => t.classList.remove('active'));
+      e.target.classList.add('active');
+    }
+
+    function showDashTab(tab, e) {
+      document.getElementById('coursesTab').classList.toggle('hidden', tab !== 'courses');
+      document.getElementById('timetableTab').classList.toggle('hidden', tab !== 'timetable');
+      document.getElementById('attendanceTab').classList.toggle('hidden', tab !== 'attendance');
+      document.querySelectorAll('#dashboardScreen .tab').forEach(t => t.classList.remove('active'));
+      e.target.classList.add('active');
+      if (tab === 'courses') loadCourses();
+      if (tab === 'timetable') loadTimetable();
+      if (tab === 'attendance') loadAttendance();
+    }
+
+    function showMessage(elId, type, msg) {
+      const el = document.getElementById(elId);
+      el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+      setTimeout(() => el.innerHTML = '', 3000);
+    }
+
+    async function register() {
+      const username = document.getElementById('regUsername').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const password = document.getElementById('regPassword').value;
+      const role = document.getElementById('regRole').value;
+
+      if (!username || !email || !password) {
+        showMessage('regMessage', 'error', 'All fields required');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/register`, {
+          method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ username, email, password, role })
+        });
+        const result = await response.json();
+        if (!result.success) { showMessage('regMessage', 'error', result.message); return; }
+
+        // Auto login after register
+        const loginRes = await fetch(`${API_URL}/login`, {
+          method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ username, password })
+        });
+        const loginData = await loginRes.json();
+        if (loginData.success) {
+          currentUser = loginData.user;
+          document.getElementById('userName').textContent = currentUser.username;
+          document.getElementById('userRole').textContent = currentUser.role;
+          document.getElementById('authScreen').classList.add('hidden');
+          document.getElementById('dashboardScreen').classList.remove('hidden');
+          loadCourses(); loadTimetable(); loadAttendance();
+        }
+      } catch (err) {
+        showMessage('regMessage', 'error', 'Cannot connect to server.');
+      }
+    }
+
+    async function login() {
+      const username = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      try {
+        const res = await fetch(`${API_URL}/login`, {
+          method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ username, password })
+        });
+        const result = await res.json();
+        if (!result.success) { showMessage('authMessage', 'error', result.message); return; }
+        currentUser = result.user;
+        document.getElementById('userName').textContent = currentUser.username;
+        document.getElementById('userRole').textContent = currentUser.role;
+        document.getElementById('authScreen').classList.add('hidden');
+        document.getElementById('dashboardScreen').classList.remove('hidden');
+        loadCourses(); loadTimetable(); loadAttendance();
+      } catch (e) { showMessage('authMessage', 'error', 'Cannot connect to server.'); }
+    }
+
+    function logout() {
+      currentUser = null;
+      document.getElementById('dashboardScreen').classList.add('hidden');
+      document.getElementById('authScreen').classList.remove('hidden');
+    }
+
+    async function loadCourses() {
+      try {
+        const res = await fetch(`${API_URL}/courses`);
+        const data = await res.json();
+        const el = document.getElementById('coursesTab');
+        el.innerHTML = `<h2>Available Courses</h2><div class="course-grid">
+          ${data.courses.map(c => `
+            <div class="course-card">
+              <h3>${c.title}</h3>
+              <p>${c.description}</p>
+              <p><strong>Instructor:</strong> ${c.instructor}</p>
+              <p><strong>Duration:</strong> ${c.duration}</p>
+              <button class="btn btn-small" onclick="enroll(${c.id})">Enroll</button>
+            </div>`).join('')}
+        </div>`;
+      } catch (e) { console.error(e); }
+    }
+
+    async function enroll(id) {
+      if (!currentUser) return alert('Login required');
+      const res = await fetch(`${API_URL}/enroll`, {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ userId: currentUser.id, courseId: id })
+      });
+      const result = await res.json();
+      alert(result.message);
+    }
+
+    async function loadTimetable() {
+      try {
+        const res = await fetch(`${API_URL}/timetable?userId=${currentUser.id}`);
+        const data = await res.json();
+        const el = document.getElementById('timetableTab');
+        el.innerHTML = `<h2>📅 Timetable</h2>` + data.timetable.map(t => `
+          <div class="course-card">
+            <h3>${t.courseTitle}</h3>
+            <p>${t.day} | ${t.startTime} - ${t.endTime}</p>
+            <p>${t.room}</p>
+          </div>`).join('');
+      } catch (e) { console.error(e); }
+    }
+
+    async function loadAttendance() {
+      try {
+        const res = await fetch(`${API_URL}/attendance?userId=${currentUser.id}`);
+        const data = await res.json();
+        const el = document.getElementById('attendanceTab');
+        el.innerHTML = `<h2>✓ Attendance</h2>
+          <table class="attendance-table">
+            <tr><th>Course</th><th>Date</th><th>Status</th></tr>
+            ${data.attendance.map(a => `
+              <tr><td>${a.courseTitle}</td><td>${a.date}</td>
+              <td class="status-${a.status.toLowerCase()}">${a.status}</td></tr>`).join('')}
+          </table>`;
+      } catch (e) { console.error(e); }
+    }
+  </script>
+</body>
+</html>
